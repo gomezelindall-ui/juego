@@ -1,508 +1,1040 @@
-```html
-<!DOCTYPE html>
+
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ 
 <title>Triqui - Jugador vs Máquina</title>
-
+ 
 <style>
+ 
 * {
     box-sizing: border-box;
 }
-
+ 
 body {
     margin: 0;
-    font-family: Arial, sans-serif;
-    background: #694e4e;
+    font-family: 'Fredoka', 'Comic Sans MS', sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%, #00f2fe 100%);
+    background-size: 400% 400%;
+    animation: gradientShift 8s ease infinite;
+ 
     display: flex;
     justify-content: center;
     align-items: center;
+ 
     min-height: 100vh;
+    padding: 20px;
 }
-
+ 
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+ 
 .juego {
-    background: white;
-    padding: 30px;
-    border-radius: 15px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+    background: linear-gradient(145deg, #ffffff 0%, #f8f5ff 100%);
+ 
+    padding: 40px;
+ 
+    border-radius: 30px;
+ 
+    box-shadow:
+        0 20px 60px rgba(102, 126, 234, 0.4),
+        0 0 40px rgba(240, 147, 251, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+ 
     text-align: center;
+    max-width: 500px;
 }
-
+ 
 h1 {
     margin-top: 0;
-    font-size: 40px;
+    font-size: 55px;
+    background: linear-gradient(135deg, #667eea, #764ba2, #f093fb, #4facfe);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 10px;
 }
-
+ 
 #estado {
-    font-size: 20px;
+    font-size: 22px;
+ 
     font-weight: bold;
-    margin-bottom: 20px;
+ 
+    margin-bottom: 30px;
+ 
+    min-height: 30px;
+ 
+    color: #764ba2;
+ 
+    animation: pulse 1.5s ease-in-out infinite;
 }
-
+ 
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+ 
 .tablero {
-    width: 330px;
-    height: 330px;
-    margin: auto;
+    width: 350px;
+    height: 350px;
+ 
+    margin: 0 auto 30px;
+ 
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: repeat(3, 1fr);
-    gap: 8px;
+ 
+    grid-template-columns:
+        repeat(3, 1fr);
+ 
+    grid-template-rows:
+        repeat(3, 1fr);
+ 
+    gap: 12px;
+ 
+    padding: 15px;
+ 
+    background: linear-gradient(135deg, #667eea20, #f093fb20);
+ 
+    border-radius: 25px;
+ 
+    border: 3px solid #667eea;
 }
-
+ 
 .casilla {
-    background: #e5e5e5;
+    background: linear-gradient(135deg, #FF6B9D, #FFA502);
+ 
     border: none;
-    border-radius: 10px;
-    font-size: 65px;
+ 
+    border-radius: 15px;
+ 
+    font-size: 70px;
+ 
     font-weight: bold;
+ 
     cursor: pointer;
-    transition: 0.15s;
+ 
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+ 
+    box-shadow: 0 10px 25px rgba(255, 107, 157, 0.3);
+ 
+    color: white;
+ 
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+ 
+    position: relative;
+ 
+    overflow: hidden;
 }
-
-.casilla:hover {
-    background: #d5d5d5;
-    transform: scale(1.03);
+ 
+.casilla:nth-child(1) { background: linear-gradient(135deg, #667eea, #764ba2); }
+.casilla:nth-child(2) { background: linear-gradient(135deg, #f093fb, #4facfe); }
+.casilla:nth-child(3) { background: linear-gradient(135deg, #00f2fe, #4facfe); }
+.casilla:nth-child(4) { background: linear-gradient(135deg, #43e97b, #38f9d7); }
+.casilla:nth-child(5) { background: linear-gradient(135deg, #fa709a, #fee140); }
+.casilla:nth-child(6) { background: linear-gradient(135deg, #30cfd0, #330867); }
+.casilla:nth-child(7) { background: linear-gradient(135deg, #a8edea, #fed6e3); }
+.casilla:nth-child(8) { background: linear-gradient(135deg, #ff9a56, #ff6a88); }
+.casilla:nth-child(9) { background: linear-gradient(135deg, #2e2e78, #7f5af0); }
+ 
+.casilla:hover:not(:disabled) {
+    transform: translateY(-8px) scale(1.08);
+ 
+    box-shadow: 
+        0 15px 35px rgba(102, 126, 234, 0.5),
+        0 0 20px rgba(240, 147, 251, 0.4);
+ 
+    filter: brightness(1.15);
 }
-
+ 
+.casilla:active:not(:disabled) {
+    transform: translateY(-4px) scale(1.05);
+}
+ 
 .casilla:disabled {
     cursor: default;
+ 
+    opacity: 0.9;
 }
-
+ 
 .ganadora {
-    background: #8ee68e !important;
+    animation: shine 0.6s ease-in-out;
+    box-shadow: 
+        0 0 30px rgba(0, 255, 100, 0.8),
+        0 15px 35px rgba(0, 255, 100, 0.4) !important;
 }
-
+ 
+@keyframes shine {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+ 
 #reiniciar {
-    margin-top: 25px;
-    padding: 12px 25px;
-    font-size: 17px;
+ 
+    margin-top: 20px;
+ 
+    padding: 16px 40px;
+ 
+    font-size: 18px;
+ 
+    font-weight: bold;
+ 
     border: none;
-    border-radius: 8px;
-    background: #333;
+ 
+    border-radius: 50px;
+ 
+    background: linear-gradient(135deg, #667eea, #764ba2);
+ 
     color: white;
+ 
     cursor: pointer;
+ 
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+ 
+    transition: all 0.3s ease;
+ 
+    font-family: 'Fredoka', sans-serif;
+ 
+    text-transform: uppercase;
+ 
+    letter-spacing: 1px;
 }
-
+ 
 #reiniciar:hover {
-    background: #555;
+    transform: translateY(-3px);
+ 
+    box-shadow: 
+        0 15px 40px rgba(102, 126, 234, 0.6),
+        0 0 20px rgba(240, 147, 251, 0.4);
+ 
+    filter: brightness(1.1);
 }
+ 
+#reiniciar:active {
+    transform: translateY(-1px);
+}
+ 
 </style>
+ 
 </head>
-
+ 
 <body>
-
+ 
 <div class="juego">
-
-<h1>Triqui</h1>
-
-<div id="estado">
-    La máquina está pensando...
+ 
+    <h1>🎮 TRIQUI 🎮</h1>
+ 
+    <div id="estado">
+        Tienes 7 segundos para comenzar...
+    </div>
+ 
+    <div class="tablero">
+ 
+        <button class="casilla" data-pos="0"></button>
+        <button class="casilla" data-pos="1"></button>
+        <button class="casilla" data-pos="2"></button>
+ 
+        <button class="casilla" data-pos="3"></button>
+        <button class="casilla" data-pos="4"></button>
+        <button class="casilla" data-pos="5"></button>
+ 
+        <button class="casilla" data-pos="6"></button>
+        <button class="casilla" data-pos="7"></button>
+        <button class="casilla" data-pos="8"></button>
+ 
+    </div>
+ 
+    <button id="reiniciar">
+        ✨ Nueva partida ✨
+    </button>
+ 
 </div>
-
-<div class="tablero">
-
-<button class="casilla" data-pos="0"></button>
-<button class="casilla" data-pos="1"></button>
-<button class="casilla" data-pos="2"></button>
-
-<button class="casilla" data-pos="3"></button>
-<button class="casilla" data-pos="4"></button>
-<button class="casilla" data-pos="5"></button>
-
-<button class="casilla" data-pos="6"></button>
-<button class="casilla" data-pos="7"></button>
-<button class="casilla" data-pos="8"></button>
-
-</div>
-
-<button id="reiniciar">
-Nueva partida
-</button>
-
-</div>
-
+ 
+ 
 <script>
-
+ 
+ 
+/* =========================
+   CONFIGURACIÓN
+========================= */
+ 
 const JUGADOR = "X";
+ 
 const MAQUINA = "O";
-
+ 
+ 
+/* =========================
+   VARIABLES
+========================= */
+ 
 let tablero = [
     "", "", "",
     "", "", "",
     "", "", ""
 ];
-
+ 
 let juegoTerminado = false;
-let turnoJugador = false;
-
+ 
+ 
+/*
+   Al comenzar:
+   true = el jugador puede jugar
+*/
+let turnoJugador = true;
+ 
+ 
+/*
+   Temporizador de los 7 segundos
+*/
+let temporizadorInicio = null;
+ 
+ 
+/*
+   Indica si ya comenzó la partida
+*/
+let partidaIniciada = false;
+ 
+ 
+/* =========================
+   COMBINACIONES GANADORAS
+========================= */
+ 
 const combinacionesGanadoras = [
-
+ 
     [0,1,2],
     [3,4,5],
     [6,7,8],
-
+ 
     [0,3,6],
     [1,4,7],
     [2,5,8],
-
+ 
     [0,4,8],
     [2,4,6]
-
+ 
 ];
-
+ 
+ 
+/* =========================
+   ELEMENTOS HTML
+========================= */
+ 
 const casillas =
-document.querySelectorAll(".casilla");
-
+    document.querySelectorAll(".casilla");
+ 
 const estado =
-document.getElementById("estado");
-
+    document.getElementById("estado");
+ 
 const botonReiniciar =
-document.getElementById("reiniciar");
-
-
-/* JUGADOR */
-
+    document.getElementById("reiniciar");
+ 
+ 
+/* =========================
+   JUGADA DEL JUGADOR
+========================= */
+ 
 casillas.forEach(casilla => {
-
+ 
     casilla.addEventListener("click", function() {
-
-        if (juegoTerminado) return;
-
-        if (!turnoJugador) return;
-
-        const posicion =
-        Number(this.dataset.pos);
-
-        if (tablero[posicion] !== "") return;
-
-        tablero[posicion] = JUGADOR;
-
-        actualizarTablero();
-
-        if (comprobarResultado()) return;
-
-        if (tableroLleno()) {
-
-            estado.textContent = "¡Empate!";
-            juegoTerminado = true;
+ 
+        /*
+           Si el juego terminó,
+           no hacer nada.
+        */
+        if (juegoTerminado) {
             return;
-
         }
-
-        turnoJugador = false;
-
-        estado.textContent =
-        "🤖 La máquina está pensando...";
-
-        actualizarTablero();
-
-        setTimeout(() => {
-
-            jugarMaquina();
-
-        }, 500);
-
-    });
-
-});
-
-
-/* MÁQUINA */
-
-function jugarMaquina() {
-
-    if (juegoTerminado) return;
-
-    const mejorMovimiento =
-    obtenerMejorMovimiento();
-
-    if (mejorMovimiento === -1) return;
-
-    tablero[mejorMovimiento] = MAQUINA;
-
-    actualizarTablero();
-
-    if (comprobarResultado()) return;
-
-    if (tableroLleno()) {
-
-        estado.textContent = "¡Empate!";
-        juegoTerminado = true;
-        return;
-
-    }
-
-    turnoJugador = true;
-
-    estado.textContent =
-    "Tu turno — eres X";
-
-    actualizarTablero();
-}
-
-
-/* MINIMAX */
-
-function obtenerMejorMovimiento() {
-
-    let mejorPuntuacion = -Infinity;
-    let movimiento = -1;
-
-    for (let i = 0; i < 9; i++) {
-
-        if (tablero[i] === "") {
-
-            tablero[i] = MAQUINA;
-
-            const puntuacion =
-            minimax(tablero, false);
-
-            tablero[i] = "";
-
-            if (puntuacion > mejorPuntuacion) {
-
-                mejorPuntuacion =
-                puntuacion;
-
-                movimiento = i;
-            }
+ 
+ 
+        /*
+           Si no es turno del jugador,
+           no hacer nada.
+        */
+        if (!turnoJugador) {
+            return;
         }
-    }
-
-    return movimiento;
-}
-
-
-function minimax(tableroActual, maximizando) {
-
-    const resultado =
-    obtenerGanador(tableroActual);
-
-    if (resultado === MAQUINA) {
-        return 10;
-    }
-
-    if (resultado === JUGADOR) {
-        return -10;
-    }
-
-    if (!tableroActual.includes("")) {
-        return 0;
-    }
-
-    if (maximizando) {
-
-        let mejorPuntuacion = -Infinity;
-
-        for (let i = 0; i < 9; i++) {
-
-            if (tableroActual[i] === "") {
-
-                tableroActual[i] = MAQUINA;
-
-                const puntuacion =
-                minimax(tableroActual, false);
-
-                tableroActual[i] = "";
-
-                mejorPuntuacion =
-                Math.max(
-                    mejorPuntuacion,
-                    puntuacion
-                );
-            }
-        }
-
-        return mejorPuntuacion;
-
-    } else {
-
-        let mejorPuntuacion = Infinity;
-
-        for (let i = 0; i < 9; i++) {
-
-            if (tableroActual[i] === "") {
-
-                tableroActual[i] = JUGADOR;
-
-                const puntuacion =
-                minimax(tableroActual, true);
-
-                tableroActual[i] = "";
-
-                mejorPuntuacion =
-                Math.min(
-                    mejorPuntuacion,
-                    puntuacion
-                );
-            }
-        }
-
-        return mejorPuntuacion;
-    }
-}
-
-
-/* GANADOR */
-
-function obtenerGanador(tableroActual) {
-
-    for (const combinacion of combinacionesGanadoras) {
-
-        const a = combinacion[0];
-        const b = combinacion[1];
-        const c = combinacion[2];
-
-        if (
-            tableroActual[a] !== "" &&
-            tableroActual[a] === tableroActual[b] &&
-            tableroActual[a] === tableroActual[c]
-        ) {
-
-            return tableroActual[a];
-
-        }
-    }
-
-    return null;
-}
-
-
-function comprobarResultado() {
-
-    const ganador =
-    obtenerGanador(tablero);
-
-    if (ganador === null) {
-        return false;
-    }
-
-    juegoTerminado = true;
-
-    if (ganador === JUGADOR) {
-
-        estado.textContent =
-        "🎉 ¡Ganaste!";
-
-    } else {
-
-        estado.textContent =
-        "🤖 ¡La máquina ganó!";
-
-    }
-
-    for (const combinacion of combinacionesGanadoras) {
-
-        const a = combinacion[0];
-        const b = combinacion[1];
-        const c = combinacion[2];
-
-        if (
-            tablero[a] !== "" &&
-            tablero[a] === tablero[b] &&
-            tablero[a] === tablero[c]
-        ) {
-
-            casillas[a].classList.add("ganadora");
-            casillas[b].classList.add("ganadora");
-            casillas[c].classList.add("ganadora");
-
-            break;
-        }
-    }
-
-    actualizarTablero();
-
-    return true;
-}
-
-
-/* TABLERO LLENO */
-
-function tableroLleno() {
-
-    return !tablero.includes("");
-
-}
-
-
-/* ACTUALIZAR TABLERO */
-
-function actualizarTablero() {
-
-    casillas.forEach(casilla => {
-
+ 
+ 
         const posicion =
-        Number(casilla.dataset.pos);
-
-        casilla.textContent =
-        tablero[posicion];
-
-        casilla.disabled =
-        tablero[posicion] !== "" ||
-        !turnoJugador ||
-        juegoTerminado;
-
+            Number(this.dataset.pos);
+ 
+ 
+        /*
+           No permitir ocupar
+           una casilla usada.
+        */
+        if (tablero[posicion] !== "") {
+            return;
+        }
+ 
+ 
+        /*
+           Si esta es la primera
+           jugada del jugador,
+           cancelamos los 7 segundos.
+        */
+        if (!partidaIniciada) {
+ 
+            partidaIniciada = true;
+ 
+            clearTimeout(temporizadorInicio);
+ 
+        }
+ 
+ 
+        /*
+           Colocar X
+        */
+        tablero[posicion] = JUGADOR;
+ 
+ 
+        actualizarTablero();
+ 
+ 
+        /*
+           Comprobar si ganó
+        */
+        if (comprobarResultado()) {
+            return;
+        }
+ 
+ 
+        /*
+           Comprobar empate
+        */
+        if (tableroLleno()) {
+ 
+            estado.textContent =
+                "🤝 ¡Empate!";
+ 
+            juegoTerminado = true;
+ 
+            actualizarTablero();
+ 
+            return;
+        }
+ 
+ 
+        /*
+           Ahora juega la máquina
+        */
+        turnoJugador = false;
+ 
+        estado.textContent =
+            "🤖 La máquina está pensando...";
+ 
+ 
+        actualizarTablero();
+ 
+ 
+        /*
+           Pequeña espera antes
+           de que juegue la máquina.
+        */
+        setTimeout(() => {
+ 
+            jugarMaquina();
+ 
+        }, 500);
+ 
     });
-
+ 
+});
+ 
+ 
+/* =========================
+   JUGADA DE LA MÁQUINA
+========================= */
+ 
+function jugarMaquina() {
+ 
+    if (juegoTerminado) {
+        return;
+    }
+ 
+ 
+    const mejorMovimiento =
+        obtenerMejorMovimiento();
+ 
+ 
+    /*
+       Si no hay movimiento disponible
+    */
+    if (mejorMovimiento === -1) {
+        return;
+    }
+ 
+ 
+    /*
+       Colocar O
+    */
+    tablero[mejorMovimiento] =
+        MAQUINA;
+ 
+ 
+    actualizarTablero();
+ 
+ 
+    /*
+       Comprobar si ganó la máquina
+    */
+    if (comprobarResultado()) {
+        return;
+    }
+ 
+ 
+    /*
+       Comprobar empate
+    */
+    if (tableroLleno()) {
+ 
+        estado.textContent =
+            "🤝 ¡Empate!";
+ 
+        juegoTerminado = true;
+ 
+        actualizarTablero();
+ 
+        return;
+    }
+ 
+ 
+    /*
+       Ahora vuelve a jugar
+       el usuario.
+    */
+    turnoJugador = true;
+ 
+    estado.textContent =
+        "Tu turno — eres X 🎯";
+ 
+ 
+    actualizarTablero();
+ 
 }
-
-
-/* REINICIAR */
-
+ 
+ 
+/* =========================
+   MINIMAX
+========================= */
+ 
+function obtenerMejorMovimiento() {
+ 
+    let mejorPuntuacion =
+        -Infinity;
+ 
+    let movimiento = -1;
+ 
+ 
+    for (let i = 0; i < 9; i++) {
+ 
+        if (tablero[i] === "") {
+ 
+            tablero[i] = MAQUINA;
+ 
+ 
+            const puntuacion =
+                minimax(
+                    tablero,
+                    false
+                );
+ 
+ 
+            tablero[i] = "";
+ 
+ 
+            if (
+                puntuacion >
+                mejorPuntuacion
+            ) {
+ 
+                mejorPuntuacion =
+                    puntuacion;
+ 
+                movimiento = i;
+ 
+            }
+ 
+        }
+ 
+    }
+ 
+ 
+    return movimiento;
+ 
+}
+ 
+ 
+/* =========================
+   ALGORITMO MINIMAX
+========================= */
+ 
+function minimax(
+    tableroActual,
+    maximizando
+) {
+ 
+    const resultado =
+        obtenerGanador(tableroActual);
+ 
+ 
+    /*
+       Si gana la máquina
+    */
+    if (resultado === MAQUINA) {
+ 
+        return 10;
+ 
+    }
+ 
+ 
+    /*
+       Si gana el jugador
+    */
+    if (resultado === JUGADOR) {
+ 
+        return -10;
+ 
+    }
+ 
+ 
+    /*
+       Si no quedan casillas
+    */
+    if (!tableroActual.includes("")) {
+ 
+        return 0;
+ 
+    }
+ 
+ 
+    /*
+       Turno de la máquina
+    */
+    if (maximizando) {
+ 
+        let mejorPuntuacion =
+            -Infinity;
+ 
+ 
+        for (let i = 0; i < 9; i++) {
+ 
+            if (
+                tableroActual[i] === ""
+            ) {
+ 
+                tableroActual[i] =
+                    MAQUINA;
+ 
+ 
+                const puntuacion =
+                    minimax(
+                        tableroActual,
+                        false
+                    );
+ 
+ 
+                tableroActual[i] = "";
+ 
+ 
+                mejorPuntuacion =
+                    Math.max(
+                        mejorPuntuacion,
+                        puntuacion
+                    );
+ 
+            }
+ 
+        }
+ 
+ 
+        return mejorPuntuacion;
+ 
+    }
+ 
+ 
+    /*
+       Turno del jugador
+    */
+    else {
+ 
+        let mejorPuntuacion =
+            Infinity;
+ 
+ 
+        for (let i = 0; i < 9; i++) {
+ 
+            if (
+                tableroActual[i] === ""
+            ) {
+ 
+                tableroActual[i] =
+                    JUGADOR;
+ 
+ 
+                const puntuacion =
+                    minimax(
+                        tableroActual,
+                        true
+                    );
+ 
+ 
+                tableroActual[i] = "";
+ 
+ 
+                mejorPuntuacion =
+                    Math.min(
+                        mejorPuntuacion,
+                        puntuacion
+                    );
+ 
+            }
+ 
+        }
+ 
+ 
+        return mejorPuntuacion;
+ 
+    }
+ 
+}
+ 
+ 
+/* =========================
+   BUSCAR GANADOR
+========================= */
+ 
+function obtenerGanador(
+    tableroActual
+) {
+ 
+    for (
+        const combinacion
+        of combinacionesGanadoras
+    ) {
+ 
+        const a =
+            combinacion[0];
+ 
+        const b =
+            combinacion[1];
+ 
+        const c =
+            combinacion[2];
+ 
+ 
+        if (
+ 
+            tableroActual[a] !== "" &&
+ 
+            tableroActual[a] ===
+            tableroActual[b] &&
+ 
+            tableroActual[a] ===
+            tableroActual[c]
+ 
+        ) {
+ 
+            return tableroActual[a];
+ 
+        }
+ 
+    }
+ 
+ 
+    return null;
+ 
+}
+ 
+ 
+/* =========================
+   COMPROBAR RESULTADO
+========================= */
+ 
+function comprobarResultado() {
+ 
+    const ganador =
+        obtenerGanador(tablero);
+ 
+ 
+    if (ganador === null) {
+ 
+        return false;
+ 
+    }
+ 
+ 
+    juegoTerminado = true;
+ 
+ 
+    if (ganador === JUGADOR) {
+ 
+        estado.textContent =
+            "🎉 ¡GANASTE! 🎉";
+ 
+    }
+ 
+    else {
+ 
+        estado.textContent =
+            "🤖 ¡La máquina ganó! 🤖";
+ 
+    }
+ 
+ 
+    /*
+       Pintar combinación ganadora
+    */
+    for (
+        const combinacion
+        of combinacionesGanadoras
+    ) {
+ 
+        const a =
+            combinacion[0];
+ 
+        const b =
+            combinacion[1];
+ 
+        const c =
+            combinacion[2];
+ 
+ 
+        if (
+ 
+            tablero[a] !== "" &&
+ 
+            tablero[a] ===
+            tablero[b] &&
+ 
+            tablero[a] ===
+            tablero[c]
+ 
+        ) {
+ 
+            casillas[a]
+                .classList
+                .add("ganadora");
+ 
+            casillas[b]
+                .classList
+                .add("ganadora");
+ 
+            casillas[c]
+                .classList
+                .add("ganadora");
+ 
+ 
+            break;
+ 
+        }
+ 
+    }
+ 
+ 
+    actualizarTablero();
+ 
+ 
+    return true;
+ 
+}
+ 
+ 
+/* =========================
+   TABLERO LLENO
+========================= */
+ 
+function tableroLleno() {
+ 
+    return !tablero.includes("");
+ 
+}
+ 
+ 
+/* =========================
+   ACTUALIZAR TABLERO
+========================= */
+ 
+function actualizarTablero() {
+ 
+    casillas.forEach(casilla => {
+ 
+        const posicion =
+            Number(
+                casilla.dataset.pos
+            );
+ 
+ 
+        casilla.textContent =
+            tablero[posicion];
+ 
+ 
+        /*
+           Desactivar casilla si:
+ 
+           - Ya está ocupada
+           - No es turno del jugador
+           - El juego terminó
+        */
+        casilla.disabled =
+ 
+            tablero[posicion] !== "" ||
+ 
+            !turnoJugador ||
+ 
+            juegoTerminado;
+ 
+    });
+ 
+}
+ 
+ 
+/* =========================
+   INICIAR TEMPORIZADOR
+========================= */
+ 
+function iniciarTemporizador() {
+ 
+    /*
+       El jugador tiene 7 segundos.
+    */
+ 
+    turnoJugador = true;
+ 
+    partidaIniciada = false;
+ 
+    estado.textContent =
+        "Tu turno — tienes 7 segundos ⏰";
+ 
+ 
+    actualizarTablero();
+ 
+ 
+    /*
+       Después de 7 segundos,
+       si el jugador no jugó,
+       comienza la máquina.
+    */
+    temporizadorInicio = setTimeout(() => {
+ 
+ 
+        /*
+           Solo hacer el movimiento
+           si todavía no se ha jugado.
+        */
+        if (
+            !partidaIniciada &&
+            !juegoTerminado
+        ) {
+ 
+            partidaIniciada = true;
+ 
+            turnoJugador = false;
+ 
+            estado.textContent =
+                "⏰ Pasaron 7 segundos...";
+ 
+ 
+            actualizarTablero();
+ 
+ 
+            /*
+               Esperar medio segundo
+               antes de colocar O.
+            */
+            setTimeout(() => {
+ 
+                jugarMaquina();
+ 
+            }, 500);
+ 
+        }
+ 
+    }, 7000);
+ 
+}
+ 
+ 
+/* =========================
+   REINICIAR
+========================= */
+ 
 botonReiniciar.addEventListener(
     "click",
     reiniciar
 );
-
-
+ 
+ 
 function reiniciar() {
-
+ 
+    /*
+       Cancelar cualquier
+       temporizador anterior.
+    */
+    clearTimeout(
+        temporizadorInicio
+    );
+ 
+ 
+    /*
+       Vaciar tablero
+    */
     tablero = [
+ 
         "", "", "",
+ 
         "", "", "",
+ 
         "", "", ""
+ 
     ];
-
+ 
+ 
     juegoTerminado = false;
-
-    turnoJugador = false;
-
+ 
+    partidaIniciada = false;
+ 
+    turnoJugador = true;
+ 
+ 
+    /*
+       Limpiar casillas
+    */
     casillas.forEach(casilla => {
-
+ 
         casilla.textContent = "";
-
-        casilla.disabled = true;
-
+ 
+        casilla.disabled = false;
+ 
         casilla.classList.remove(
             "ganadora"
         );
-
+ 
     });
-
-    estado.textContent =
-    "🤖 La máquina está pensando...";
-
-    setTimeout(() => {
-
-        jugarMaquina();
-
-    }, 500);
-
+ 
+ 
+    /*
+       Volver a dar 7 segundos
+       al jugador.
+    */
+    iniciarTemporizador();
+ 
 }
-
-
-/* INICIO */
-
-setTimeout(() => {
-
-    jugarMaquina();
-
-}, 500);
-
+ 
+ 
+/* =========================
+   INICIO DEL JUEGO
+========================= */
+ 
+iniciarTemporizador();
+ 
+ 
 </script>
-
+ 
 </body>
 </html>
-```
+ 

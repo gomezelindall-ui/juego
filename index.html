@@ -1,163 +1,132 @@
 <!DOCTYPE html>
+
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Triqui - Jugador evelin vs Máquina</title>
+```
+<title>Triqui - Jugador evelin vs Máquina</title>
 
-    <style>
+<style>
+    * {
+        box-sizing: border-box;
+    }
 
-        * {
-            box-sizing: border-box;
-        }
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #694e4e;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+    }
 
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
+    .juego {
+        background: white;
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        text-align: center;
+    }
 
-            background: #694e4e;
+    h1 {
+        margin-top: 0;
+        font-size: 40px;
+    }
 
-            display: flex;
-            justify-content: center;
-            align-items: center;
+    #estado {
+        font-size: 20px;
+        font-weight: bold;
+        margin-bottom: 20px;
+    }
 
-            min-height: 100vh;
-        }
+    .tablero {
+        width: 330px;
+        height: 330px;
+        margin: auto;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: repeat(3, 1fr);
+        gap: 8px;
+    }
 
-        .juego {
-            background: white;
+    .casilla {
+        background: #e5e5e5;
+        border: none;
+        border-radius: 10px;
+        font-size: 65px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.15s;
+    }
 
-            padding: 30px;
+    .casilla:hover {
+        background: #d5d5d5;
+        transform: scale(1.03);
+    }
 
-            border-radius: 15px;
+    .casilla:disabled {
+        cursor: default;
+    }
 
-            box-shadow:
-                0 5px 20px rgba(0,0,0,0.15);
+    .ganadora {
+        background: #8ee68e !important;
+    }
 
-            text-align: center;
-        }
+    #reiniciar {
+        margin-top: 25px;
+        padding: 12px 25px;
+        font-size: 17px;
+        border: none;
+        border-radius: 8px;
+        background: #333;
+        color: white;
+        cursor: pointer;
+    }
 
-        h1 {
-            margin-top: 0;
-            font-size: 40px;
-        }
+    #reiniciar:hover {
+        background: #555;
+    }
+</style>
+```
 
-        #estado {
-            font-size: 20px;
-            font-weight: bold;
-
-            margin-bottom: 20px;
-        }
-
-        .tablero {
-
-            width: 330px;
-            height: 330px;
-
-            margin: auto;
-
-            display: grid;
-
-            grid-template-columns: repeat(3, 1fr);
-            grid-template-rows: repeat(3, 1fr);
-
-            gap: 8px;
-        }
-
-        .casilla {
-
-            background: #e5e5e5;
-
-            border: none;
-
-            border-radius: 10px;
-
-            font-size: 65px;
-
-            font-weight: bold;
-
-            cursor: pointer;
-
-            transition: 0.15s;
-        }
-
-        .casilla:hover {
-
-            background: #d5d5d5;
-
-            transform: scale(1.03);
-        }
-
-        .casilla:disabled {
-
-            cursor: default;
-        }
-
-        .ganadora {
-
-            background: #8ee68e !important;
-        }
-
-        #reiniciar {
-
-            margin-top: 25px;
-
-            padding: 12px 25px;
-
-            font-size: 17px;
-
-            border: none;
-
-            border-radius: 8px;
-
-            background: #333;
-
-            color: white;
-
-            cursor: pointer;
-        }
-
-        #reiniciar:hover {
-
-            background: #555;
-        }
-
-    </style>
 </head>
 
 <body>
 
 <div class="juego">
 
-    <h1>Triqui</h1>
+```
+<h1>Triqui</h1>
 
-    <div id="estado">
-        Tu turno — eres X
-    </div>
+<div id="estado">
+    La máquina está empezando...
+</div>
 
-    <div class="tablero">
+<div class="tablero">
 
-        <button class="casilla" data-pos="0"></button>
-        <button class="casilla" data-pos="1"></button>
-        <button class="casilla" data-pos="2"></button>
+    <button class="casilla" data-pos="0"></button>
+    <button class="casilla" data-pos="1"></button>
+    <button class="casilla" data-pos="2"></button>
 
-        <button class="casilla" data-pos="3"></button>
-        <button class="casilla" data-pos="4"></button>
-        <button class="casilla" data-pos="5"></button>
+    <button class="casilla" data-pos="3"></button>
+    <button class="casilla" data-pos="4"></button>
+    <button class="casilla" data-pos="5"></button>
 
-        <button class="casilla" data-pos="6"></button>
-        <button class="casilla" data-pos="7"></button>
-        <button class="casilla" data-pos="8"></button>
-
-    </div>
-
-    <button id="reiniciar">
-        Nueva partida
-    </button>
+    <button class="casilla" data-pos="6"></button>
+    <button class="casilla" data-pos="7"></button>
+    <button class="casilla" data-pos="8"></button>
 
 </div>
 
+<button id="reiniciar">
+    Nueva partida
+</button>
+```
+
+</div>
 
 <script>
 
@@ -178,7 +147,8 @@
 
     let juegoTerminado = false;
 
-    let turnoJugador = true;
+    // Ahora comienza la máquina
+    let turnoJugador = false;
 
 
     /*
@@ -360,9 +330,6 @@
      * ============================
      * MINIMAX
      * ============================
-     *
-     * La máquina analiza las posibles
-     * jugadas y selecciona la mejor.
      */
 
     function obtenerMejorMovimiento() {
@@ -676,7 +643,8 @@
              */
 
             casilla.disabled =
-                tablero[posicion] !== "";
+                tablero[posicion] !== "" ||
+                !turnoJugador;
 
         });
 
@@ -706,14 +674,15 @@
 
         juegoTerminado = false;
 
-        turnoJugador = true;
+        // La máquina vuelve a comenzar
+        turnoJugador = false;
 
 
         casillas.forEach(casilla => {
 
             casilla.textContent = "";
 
-            casilla.disabled = false;
+            casilla.disabled = true;
 
             casilla.classList.remove(
                 "ganadora"
@@ -723,9 +692,37 @@
 
 
         estado.textContent =
-            "Tu turno — eres X";
+            "La máquina está pensando...";
+
+
+        /*
+         * La máquina realiza automáticamente
+         * la primera jugada.
+         */
+
+        setTimeout(() => {
+
+            jugarMaquina();
+
+        }, 500);
 
     }
+
+
+    /*
+     * ============================
+     * INICIO AUTOMÁTICO
+     * ============================
+     *
+     * Al abrir la página, la máquina
+     * también realiza la primera jugada.
+     */
+
+    setTimeout(() => {
+
+        jugarMaquina();
+
+    }, 500);
 
 </script>
 
